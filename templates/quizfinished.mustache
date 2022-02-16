@@ -1,31 +1,132 @@
 
-
+<div class="minilessonname">{{coursename}}</div>
 <h1 class="text-center">Total Score: {{total}}%</h1>
-<hr>
+<div class="quizrating">
+    {{#onestar}}
+    <span><img src="{{{ config.wwwroot }}}/mod/minilesson/pix/start_icon.png"/></span>
+    <span><img src="{{{ config.wwwroot }}}/mod/minilesson/pix/gray_star.png"/></span>
+    <span><img src="{{{ config.wwwroot }}}/mod/minilesson/pix/gray_star.png"/></span>
+    <span><img src="{{{ config.wwwroot }}}/mod/minilesson/pix/gray_star.png"/></span>
+    <span><img src="{{{ config.wwwroot }}}/mod/minilesson/pix/gray_star.png"/></span>
+    {{/onestar}}
+
+    {{#twostar}}
+    <span><img src="{{{ config.wwwroot }}}/mod/minilesson/pix/start_icon.png"/></span>
+    <span><img src="{{{ config.wwwroot }}}/mod/minilesson/pix/start_icon.png"/></span>
+    <span><img src="{{{ config.wwwroot }}}/mod/minilesson/pix/gray_star.png"/></span>
+    <span><img src="{{{ config.wwwroot }}}/mod/minilesson/pix/gray_star.png"/></span>
+    <span><img src="{{{ config.wwwroot }}}/mod/minilesson/pix/gray_star.png"/></span>
+    {{/twostar}}
+
+    {{#threestar}}
+    <span><img src="{{{ config.wwwroot }}}/mod/minilesson/pix/start_icon.png"/></span>
+    <span><img src="{{{ config.wwwroot }}}/mod/minilesson/pix/start_icon.png"/></span>
+    <span><img src="{{{ config.wwwroot }}}/mod/minilesson/pix/start_icon.png"/></span>
+    <span><img src="{{{ config.wwwroot }}}/mod/minilesson/pix/gray_star.png"/></span>
+    <span><img src="{{{ config.wwwroot }}}/mod/minilesson/pix/gray_star.png"/></span>
+    {{/threestar}}
+
+    {{#fourstar}}
+    <span><img src="{{{ config.wwwroot }}}/mod/minilesson/pix/start_icon.png"/></span>
+    <span><img src="{{{ config.wwwroot }}}/mod/minilesson/pix/start_icon.png"/></span>
+    <span><img src="{{{ config.wwwroot }}}/mod/minilesson/pix/start_icon.png"/></span>
+    <span><img src="{{{ config.wwwroot }}}/mod/minilesson/pix/start_icon.png"/></span>
+    <span><img src="{{{ config.wwwroot }}}/mod/minilesson/pix/gray_star.png"/></span>
+    {{/fourstar}}
+
+    {{#fivestar}}
+    <span><img src="{{{ config.wwwroot }}}/mod/minilesson/pix/start_icon.png"/></span>
+    <span><img src="{{{ config.wwwroot }}}/mod/minilesson/pix/start_icon.png"/></span>
+    <span><img src="{{{ config.wwwroot }}}/mod/minilesson/pix/start_icon.png"/></span>
+    <span><img src="{{{ config.wwwroot }}}/mod/minilesson/pix/start_icon.png"/></span>
+    <span><img src="{{{ config.wwwroot }}}/mod/minilesson/pix/start_icon.png"/></span>
+    {{/fivestar}}
+</div>
 <p>
     <a class="btn btn-primary itemscoresbutton" data-toggle="collapse" href="#itemscores" role="button" aria-expanded="false" aria-controls="itemscores">
         {{#str}}showitemscores, mod_minilesson{{/str}}
     </a>
-
 </p>
 <div class="collapse" id="itemscores">
 {{#results}}
-    <div class="mod_minilesson_result_div">
-        <div class="mod_minilesson_result_index">{{index}}</div>
-        <div class="mod_minilesson_result_title">{{title}}</div>
-        <div class="mod_minilesson_result_score">Score: {{correctitems}}/{{totalitems}}</div>
-        <div class="mod_minilesson_result_grade">Grade: {{grade}}%</div>
+    <div class="mod_minilesson_result_div">        
+        <div class="panel-group" id="accordion">
+            <div class="btn-primary mod_minilesson_result_index">{{index}}</div>
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h4 class="panel-title"> <a class="accordion-toggle mod_minilesson_result_title collapsed"" data-toggle="collapse" data-parent="#accordion" href="#accordion{{index}}">  {{title}}</a> </h4>
+                </div>
+                <div id="accordion{{index}}" class="panel-collapse collapse in">
+                <div class="panel-body">
+                    <ul class="minilesson_result">
+                    	<li><div class="mod_minilesson_question_text"><b>Question text: </b><br/>{{questext}}</div></li>
+
+                        <li><div class="mod_minilesson_result_score"><b>Score: </b><br/>{{correctitems}}/{{totalitems}}</div></li>
+                        <li><div class="mod_minilesson_result_grade"><b>Grade: </b><br/>{{grade}}%</div></li>
+                        {{#typeone}}
+                            <li> <div class="mod_minilesson_result_correctanswer"><b>Correct Answer: </b><br/>{{correctans}} </div></li>
+                            {{#typetwo}} 
+                                {{#incorrectans}}                           
+                                    <li><div class="mod_minilesson_result_incorrectanswer"><b>Incorrect Answer: </b><br/>{{{.}}} </div></li>                              
+                                {{/incorrectans}}
+                            {{/typetwo}}
+                        {{/typeone}}
+                        <li><div class="mod_minilesson_result_rating">
+                            {{#onestarr}}
+                            <span><img src="{{{ config.wwwroot }}}/mod/minilesson/pix/start_icon.png"/></span>
+                            <span><img src="{{{ config.wwwroot }}}/mod/minilesson/pix/gray_star.png"/></span>
+                            <span><img src="{{{ config.wwwroot }}}/mod/minilesson/pix/gray_star.png"/></span>
+                            <span><img src="{{{ config.wwwroot }}}/mod/minilesson/pix/gray_star.png"/></span>
+                            <span><img src="{{{ config.wwwroot }}}/mod/minilesson/pix/gray_star.png"/></span>
+                            {{/onestarr}}
+                            {{#twostars}}
+                            <span><img src="{{{ config.wwwroot }}}/mod/minilesson/pix/start_icon.png"/></span> 
+                            <span><img src="{{{ config.wwwroot }}}/mod/minilesson/pix/start_icon.png"/></span> 
+                            <span><img src="{{{ config.wwwroot }}}/mod/minilesson/pix/gray_star.png"/></span>
+                            <span><img src="{{{ config.wwwroot }}}/mod/minilesson/pix/gray_star.png"/></span>
+                            <span><img src="{{{ config.wwwroot }}}/mod/minilesson/pix/gray_star.png"/></span>
+                            {{/twostars}}
+                            {{#threestars}}
+                            <span><img src="{{{ config.wwwroot }}}/mod/minilesson/pix/start_icon.png"/></span> 
+                            <span><img src="{{{ config.wwwroot }}}/mod/minilesson/pix/start_icon.png"/></span> 
+                            <span><img src="{{{ config.wwwroot }}}/mod/minilesson/pix/start_icon.png"/></span> 
+                            <span><img src="{{{ config.wwwroot }}}/mod/minilesson/pix/gray_star.png"/></span>
+                            <span><img src="{{{ config.wwwroot }}}/mod/minilesson/pix/gray_star.png"/></span>
+                            {{/threestars}}
+                            {{#fourstars}}
+                            <span><img src="{{{ config.wwwroot }}}/mod/minilesson/pix/start_icon.png"/></span> 
+                            <span><img src="{{{ config.wwwroot }}}/mod/minilesson/pix/start_icon.png"/></span> 
+                            <span><img src="{{{ config.wwwroot }}}/mod/minilesson/pix/start_icon.png"/></span> 
+                            <span><img src="{{{ config.wwwroot }}}/mod/minilesson/pix/start_icon.png"/></span> 
+                            <span><img src="{{{ config.wwwroot }}}/mod/minilesson/pix/gray_star.png"/></span>
+                            {{/fourstars}}
+                            {{#fivestars}}
+                            <span><img src="{{{ config.wwwroot }}}/mod/minilesson/pix/start_icon.png"/></span> 
+                            <span><img src="{{{ config.wwwroot }}}/mod/minilesson/pix/start_icon.png"/></span> 
+                            <span><img src="{{{ config.wwwroot }}}/mod/minilesson/pix/start_icon.png"/></span> 
+                            <span><img src="{{{ config.wwwroot }}}/mod/minilesson/pix/start_icon.png"/></span> 
+                            <span><img src="{{{ config.wwwroot }}}/mod/minilesson/pix/start_icon.png"/></span> 
+                            {{/fivestars}}
+                        </div></li>
+                    </ul>
+                </div>
+                </div>
+            </div>
+        </div>
     </div>
 {{/results}}
+
+
+
 </div>
 {{#backtocourse}}
 <div class="minilesson_actionbutton">
-<a class="btn btn-secondary backtocourse center" href="{{{courseurl}}}">{{#str}}backtotop, mod_minilesson{{/str}}</a>
+<a class="btn btn-primary backtocourse center" href="{{{courseurl}}}">{{#str}}backtotop, mod_minilesson{{/str}}</a>
 </div>
 {{/backtocourse}}
 {{#reattempturl}}
 <div class="minilesson_actionbutton">
-<a class="btn btn-secondary btn_finished_attempt center" href="{{{reattempturl}}}" data-href="{{{reattempturl}}}" data-action="reattempt">
+<a class="btn btn-primary btn_finished_attempt center" href="{{{reattempturl}}}" data-href="{{{reattempturl}}}" data-action="reattempt">
     {{#str}}reattempt, mod_minilesson{{/str}}</a>
 </div>
 {{/reattempturl}}

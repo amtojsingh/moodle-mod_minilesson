@@ -70,6 +70,8 @@ $capabilities = array(
         ),
         'clonepermissionsfrom' => 'moodle/course:markcomplete'
     ),
+
+
     'mod/minilesson:canpreview' => array(
         'captype' => 'write',
         'contextlevel' => CONTEXT_COURSE,

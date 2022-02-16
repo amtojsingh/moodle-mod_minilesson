@@ -14,7 +14,6 @@ use \mod_minilesson\utils;
 use \mod_minilesson\comprehensiontest;
 
 class renderer extends \plugin_renderer_base {
-
     /**
      * Returns the header for the module
      *
@@ -26,7 +25,6 @@ class renderer extends \plugin_renderer_base {
      */
     public function header($moduleinstance, $cm, $currenttab = '', $itemid = null, $extrapagetitle = null) {
         global $CFG;
-
         $activityname = format_string($moduleinstance->name, true, $moduleinstance->course);
         if (empty($extrapagetitle)) {
             $title = $this->page->course->shortname.": ".$activityname;
@@ -34,19 +32,19 @@ class renderer extends \plugin_renderer_base {
             $title = $this->page->course->shortname.": ".$activityname.": ".$extrapagetitle;
         }
 
-        // Build the buttons
+        // Build the buttons.
         $context = \context_module::instance($cm->id);
 
-        /// Header setup
+        // Header setup.
         $this->page->set_title($title);
         $this->page->set_heading($this->page->course->fullname);
         $output = $this->output->header();
 
-        //show (or not) title
+        // Show (or not) title.
         $output .= $this->fetch_title($moduleinstance, $activityname);
 
         if (has_capability('mod/minilesson:evaluate', $context)) {
-            //   $output .= $this->output->heading_with_help($activityname, 'overview', constants::M_COMPONENT);
+            //$output .= $this->output->heading_with_help($activityname, 'overview', constants::M_COMPONENT);
 
             if (!empty($currenttab)) {
                 ob_start();
@@ -55,15 +53,13 @@ class renderer extends \plugin_renderer_base {
                 ob_end_clean();
             }
         }
-
-
         return $output;
     }
 
-    public function fetch_title($moduleinstance, $title){
-        $displaytext='';
-        //dont show the heading in an iframe, it will be outside this anyway
-        if(!$moduleinstance->foriframe) {
+    public function fetch_title($moduleinstance, $title) {
+        $displaytext = '';
+        // Dont show the heading in an iframe, it will be outside this anyway.
+        if (!$moduleinstance->foriframe) {
             $thetitle = $this->output->heading($title, 3, 'main');
             $displaytext = \html_writer::div($thetitle, constants::M_CLASS . '_center');
         }
@@ -89,17 +85,16 @@ class renderer extends \plugin_renderer_base {
             $title = $this->page->course->shortname.": ".$activityname.": ".$extrapagetitle;
         }
 
-        // Build the buttons
+        // Build the buttons.
         $context = \context_module::instance($cm->id);
 
-        /// Header setup
+        // Header setup.
         $this->page->set_title($title);
         $this->page->set_heading($this->page->course->fullname);
         $output = $this->output->header();
 
-        //show (or not) title
+        // Show (or not) title.
         $output .= $this->fetch_title($moduleinstance, $activityname);
-
         return $output;
     }
 
@@ -109,7 +104,7 @@ class renderer extends \plugin_renderer_base {
     public function notabsheader($moduleinstance){
         $activityname = format_string($moduleinstance->name, true, $moduleinstance->course);
         $output = $this->output->header();
-        //show (or not) title
+        // Show (or not) title.
         $output .= $this->fetch_title($moduleinstance, $activityname);
 
         return $output;
@@ -133,12 +128,10 @@ class renderer extends \plugin_renderer_base {
         return $ret;
     }
 
-
     /**
      *
      */
-    public function reattemptbutton($moduleinstance){
-
+    public function reattemptbutton($moduleinstance) {
         $button = $this->output->single_button(new \moodle_url(constants::M_URL . '/view.php',
             array('n'=>$moduleinstance->id,'retake'=>1)),get_string('reattempt',constants::M_COMPONENT));
 
@@ -150,20 +143,19 @@ class renderer extends \plugin_renderer_base {
     /**
      *
      */
-    public function show_wheretonext($moduleinstance){
+    public function show_wheretonext($moduleinstance) {
 
         $nextactivity = utils::fetch_next_activity($moduleinstance->activitylink);
-        //show activity link if we are up to it
+        // Show activity link if we are up to it.
         if ($nextactivity->url) {
             $button= $this->output->single_button($nextactivity->url,$nextactivity->label);
-        //else lets show a back to top link
+        // Else lets show a back to top link.
         }else {
             $button = $this->output->single_button(new \moodle_url(constants::M_URL . '/view.php',
                 array('n' => $moduleinstance->id)), get_string('backtotop', constants::M_COMPONENT));
         }
         $ret = \html_writer::div($button ,constants::M_WHERETONEXT_CONTAINER);
         return $ret;
-
     }
 
 
@@ -171,14 +163,13 @@ class renderer extends \plugin_renderer_base {
     /**
      *
      */
-    public function exceededattempts($moduleinstance){
+    public function exceededattempts($moduleinstance) {
         $message = get_string("exceededattempts",constants::M_COMPONENT,$moduleinstance->maxattempts);
         $ret = \html_writer::div($message ,constants::M_CLASS  . '_afterattempt_cont');
         return $ret;
-
     }
 
-    public function show_ungradedyet(){
+    public function show_ungradedyet() {
         $message = get_string("notgradedyet",constants::M_COMPONENT);
         $ret = \html_writer::div($message ,constants::M_CLASS  . '_ungraded_cont');
         return $ret;
@@ -230,36 +221,83 @@ class renderer extends \plugin_renderer_base {
     /**
      *  Finished View
      */
-    public function show_finished_results($comp_test, $latestattempt, $canattempt){
-        global $CFG;
-
-        //quiz data
+    public function show_finished_results($comp_test, $latestattempt, $canattempt) {
+        global $CFG, $DB;
+        $ans = array(); 
+        // Quiz data.
         $quizdata = $comp_test->fetch_test_data_for_js();
-        //config
+        // Config.
+
         $config = get_config(constants::M_COMPONENT);
 
-        //steps data
+        // Course name.
+        $coursename = $DB->get_record('course', array('id' => $latestattempt->courseid));
+
+        // Steps data.
         $steps = json_decode($latestattempt->sessiondata)->steps;
 
-        //prepare results fopr display
-        $results = array_filter($steps, function($step){return $step->hasgrade;});
-        $useresults=[];
-        foreach($results as $result){
-            if(isset($quizdata[$result->index]->title)) {
-                $result->title = $quizdata[$result->index]->title;
-            }else{
-                $result->title = get_string($quizdata[$result->index]->type,constants::M_COMPONENT);
+        // Prepare results fopr display
+        $results = array_filter($steps, function($step){return $step->hasgrade;});  
+
+        $useresults = [];       
+        foreach($results as $result) { 
+                 
+            $items = $DB->get_record('minilesson_rsquestions', array('id' => $quizdata[$result->index]->id));
+            $result->title = $items->name;
+            $result->questext = $items->itemtext;
+          
+            // Lesson item types.
+            $result->typeone = ($quizdata[$result->index]->type == 'multichoice' || $quizdata[$result->index]->type == 'multiaudio' || $quizdata[$result->index]->type == 'dictationchat' || $quizdata[$result->index]->type == 'dictation' || $quizdata[$result->index]->type == 'speechcards' || $quizdata[$result->index]->type == 'shortanswer' || $quizdata[$result->index]->type == 'listenrepeat');
+
+            $result->typetwo = ($quizdata[$result->index]->type == 'multichoice' || $quizdata[$result->index]->type == 'multiaudio');
+
+            // Correct answer. 
+            if ($quizdata[$result->index]->type == 'multichoice' || $quizdata[$result->index]->type == 'multiaudio') {
+                $result->correctans = $quizdata[$result->index]->{'customtext'.$quizdata[$result->index]->correctanswer};
+            } else {
+                $result->correctans = $quizdata[$result->index]->customtext1;
             }
+
+            // Incorrect answer.
+            if ($quizdata[$result->index]->type == 'multichoice' || $quizdata[$result->index]->type == 'multiaudio') {
+            	$correctans = $quizdata[$result->index]->correctanswer;
+	            $canswer = array(
+				    $quizdata[$result->index]->customtext1,
+				    $quizdata[$result->index]->customtext2,
+				    $quizdata[$result->index]->customtext3,
+				    $quizdata[$result->index]->customtext4,
+				);
+	            unset($canswer[$correctans-1]);	
+                $ans[] = $canswer;	
+	          	$corrans = implode("<br>", $canswer);		    	 
+			    $result->incorrectans = $corrans;
+			}	
+		    
             $result->index++;
-            $useresults[]=$result;
+            // Every item stars.
+            $result->onestarr = ($result->grade <= 19);
+            $result->twostars = ($result->grade <= 39 && $result->grade >= 19);
+            $result->threestars = ($result->grade <= 59 && $result->grade >= 39);
+            $result->fourstars = ($result->grade <= 79 && $result->grade >= 59);
+            $result->fivestars = ($result->grade <= 100 && $result->grade >= 79);
+            $useresults[] = $result;
         }
 
-        //output results and back to course button
+        // Output results and back to course button.
         $tdata=new \stdClass();
+        // Course name at top of page.
+        $tdata->coursename = $coursename->fullname;
+        // Item stars.
+        $tdata->onestar = ($latestattempt->sessionscore <= 19);
+        $tdata->twostar = ($latestattempt->sessionscore <= 39 && $latestattempt->sessionscore >= 19);
+        $tdata->threestar = ($latestattempt->sessionscore <= 59 && $latestattempt->sessionscore >= 39);
+        $tdata->fourstar = ($latestattempt->sessionscore <= 79 && $latestattempt->sessionscore >= 59);
+        $tdata->fivestar = ($latestattempt->sessionscore <= 100 && $latestattempt->sessionscore >= 79); 
+        
         $tdata->total = $latestattempt->sessionscore;
         $tdata->courseurl = $CFG->wwwroot . '/course/view.php?id=' . $latestattempt->courseid;
-        $tdata->results=$useresults;
-        //output reattempt button
+        $tdata->results = $useresults;
+        // utput reattempt button
         if($canattempt){
             $reattempturl = new \moodle_url( constants::M_URL . '/view.php',
                     array('n'=>$latestattempt->moduleid, 'retake'=>1));
@@ -275,20 +313,18 @@ class renderer extends \plugin_renderer_base {
         //put it all in a div and return it
         $finisheddiv = \html_writer::div($finishedcontents ,constants::M_QUIZ_FINISHED,
                 array('id'=>constants::M_QUIZ_FINISHED,'style'=>'display: block'));
-
-
         return  $finisheddiv;
     }
 
     /**
      *  Show quiz container
      */
-    public function show_quiz($comp_test){
+    public function show_quiz($comp_test) {
 
         //quiz data
         $quizdata = $comp_test->fetch_test_data_for_js();
-        $itemshtml=[];
-        foreach($quizdata as $item){
+        $itemshtml = [];
+        foreach($quizdata as $item) {
            $itemshtml[] = $this->render_from_template(constants::M_COMPONENT . '/' . $item->type, $item);
            // $this->page->requires->js_call_amd(constants::M_COMPONENT . '/' . $item->type, 'init', array($item));
         }
@@ -306,11 +342,11 @@ class renderer extends \plugin_renderer_base {
     /**
      *  Show quiz container
      */
-    public function show_quiz_preview($comp_test, $qid){
+    public function show_quiz_preview($comp_test, $qid) {
 
         //quiz data
         $quizdata = $comp_test->fetch_test_data_for_js();
-        $itemshtml=[];
+        $itemshtml = [];
         foreach($quizdata as $item) {
             if ($item->id == $qid) {
                 $itemshtml[] = $this->render_from_template(constants::M_COMPONENT . '/' . $item->type, $item);
@@ -332,7 +368,7 @@ class renderer extends \plugin_renderer_base {
         $message =  \html_writer::tag('h4',get_string('processing',constants::M_COMPONENT),array());
         $spinner =  \html_writer::tag('i','',array('class'=>'fa fa-spinner fa-5x fa-spin'));
         $progressdiv = \html_writer::div($message . $spinner ,constants::M_PROGRESS_CONTAINER,
-            array('id'=>constants::M_PROGRESS_CONTAINER));
+            array('id' => constants::M_PROGRESS_CONTAINER));
         $ret = $hider . $progressdiv;
         return $ret;
     }
@@ -346,7 +382,7 @@ class renderer extends \plugin_renderer_base {
         $displaytext .= $this->output->box_start();
         $displaytext .=  \html_writer::div($minilesson->feedback,constants::M_CLASS  . '_center');
         $displaytext .= $this->output->box_end();
-        $ret= \html_writer::div($displaytext,constants::M_FEEDBACK_CONTAINER,array('id'=>constants::M_FEEDBACK_CONTAINER));
+        $ret = \html_writer::div($displaytext,constants::M_FEEDBACK_CONTAINER,array('id'=>constants::M_FEEDBACK_CONTAINER));
         return $ret;
     }
 
@@ -356,7 +392,7 @@ class renderer extends \plugin_renderer_base {
     public function show_title_postattempt($minilesson,$showtitle){
         $thetitle =  $this->output->heading($showtitle, 3, 'main');
         $displaytext =  \html_writer::div($thetitle ,constants::M_CLASS  . '_center');
-        $ret= \html_writer::div($displaytext,constants::M_FEEDBACK_CONTAINER . ' ' . constants::M_POSTATTEMPT,array('id'=>constants::M_FEEDBACK_CONTAINER));
+        $ret = \html_writer::div($displaytext,constants::M_FEEDBACK_CONTAINER . ' ' . constants::M_POSTATTEMPT,array('id' => constants::M_FEEDBACK_CONTAINER));
         return $ret;
     }
 
@@ -368,19 +404,19 @@ class renderer extends \plugin_renderer_base {
         $displaytext .= $this->output->heading(get_string('errorheader',constants::M_COMPONENT), 3, 'main');
         $displaytext .=  \html_writer::div(get_string('uploadconverterror',constants::M_COMPONENT),'',array());
         $displaytext .= $this->output->box_end();
-        $ret= \html_writer::div($displaytext,constants::M_ERROR_CONTAINER,array('id'=>constants::M_ERROR_CONTAINER));
+        $ret = \html_writer::div($displaytext,constants::M_ERROR_CONTAINER,array('id'=>constants::M_ERROR_CONTAINER));
         return $ret;
     }
 
 
     function fetch_activity_amd($cm, $moduleinstance,$previewquestionid=0,$canreattempt=false){
-        global $CFG, $USER;
+        global $CFG, $USER;       
         //any html we want to return to be sent to the page
         $ret_html = '';
 
         //here we set up any info we need to pass into javascript
 
-        $recopts =Array();
+        $recopts = Array();
         //recorder html ids
         $recopts['recorderid'] = constants::M_RECORDERID;
         $recopts['recordingcontainer'] = constants::M_RECORDING_CONTAINER;
@@ -398,17 +434,17 @@ class renderer extends \plugin_renderer_base {
         $recopts['quizcontainer'] = constants::M_QUIZ_CONTAINER;
         $recopts['errorcontainer'] = constants::M_ERROR_CONTAINER;
 
-        //first confirm we are authorised before we try to get the token
+        // First confirm we are authorised before we try to get the token.
         $config = get_config(constants::M_COMPONENT);
-        if(empty($config->apiuser) || empty($config->apisecret)){
+        if (empty($config->apiuser) || empty($config->apisecret)) {
             $errormessage = get_string('nocredentials',constants::M_COMPONENT,
                     $CFG->wwwroot . constants::M_PLUGINSETTINGS);
             return $this->show_problembox($errormessage);
-        }else {
-            //fetch token
+        } else {
+            // Fetch token.
             $token = utils::fetch_token($config->apiuser,$config->apisecret);
 
-            //check token authenticated and no errors in it
+            // Check token authenticated and no errors in it.
             $errormessage = utils::fetch_token_error($token);
             if(!empty($errormessage)){
                 return $this->show_problembox($errormessage);
@@ -419,19 +455,17 @@ class renderer extends \plugin_renderer_base {
         $recopts['region']=$moduleinstance->region;
         $recopts['ttslanguage']=$moduleinstance->ttslanguage;
         $recopts['ds_only']=$moduleinstance->transcriber==constants::TRANSCRIBER_POODLL;
-
-
         $recopts['courseurl']=$CFG->wwwroot . '/course/view.php?id=' . $moduleinstance->course ;
         $recopts['reattempturl']='';
-        if($canreattempt) {
+        if ($canreattempt) {
             $reattempturl = new \moodle_url(constants::M_URL . '/view.php',
                     array('n' => $moduleinstance->id, 'retake' => 1));
             $recopts['reattempturl']=$reattempturl->out();
         }
         //show back to course button if we are not in an iframe
-        if(!$config->enablesetuptab) {
+        if (!$config->enablesetuptab) {
             $recopts['backtocourse'] = true;
-        }else{
+        } else {
             $recopts['backtocourse'] = '';
         }
 
@@ -439,11 +473,11 @@ class renderer extends \plugin_renderer_base {
 
         //quiz data
         $comp_test =  new comprehensiontest($cm);
-        $quizdata =$comp_test->fetch_test_data_for_js();
-        if($previewquestionid){
+        $quizdata = $comp_test->fetch_test_data_for_js();
+        if ($previewquestionid) {
            foreach($quizdata as $item){
-               if($item->id==$previewquestionid){
-                   $item->preview=true;
+               if ($item->id == $previewquestionid) {
+                   $item->preview = true;
                    $recopts['quizdata'] = [$item];
                    break;
                }
@@ -452,25 +486,24 @@ class renderer extends \plugin_renderer_base {
             $recopts['quizdata'] = $quizdata;
         }
 
-
-
-        //this inits the M.mod_minilesson thingy, after the page has loaded.
-        //we put the opts in html on the page because moodle/AMD doesn't like lots of opts in js
-        //convert opts to json
+        // This inits the M.mod_minilesson thingy, after the page has loaded.
+        // We put the opts in html on the page because moodle/AMD doesn't like lots of opts in js.
+        // Convert opts to json.
         $jsonstring = json_encode($recopts);
         $widgetid = constants::M_RECORDERID . '_opts_9999';
         $opts_html = \html_writer::tag('input', '', array('id' => 'amdopts_' . $widgetid, 'type' => 'hidden', 'value' => $jsonstring));
 
-        //the recorder div
+        // The recorder div.
         $ret_html = $ret_html . $opts_html;
 
         $opts=array('cmid'=>$cm->id,'widgetid'=>$widgetid);
         $this->page->requires->js_call_amd("mod_minilesson/activitycontroller", 'init', array($opts));
 
 
-        //these need to be returned and echo'ed to the page
+        // These need to be returned and echo'ed to the page.
         return $ret_html;
     }
+
 
     /**
      * Return HTML to display message about problem
@@ -482,13 +515,4 @@ class renderer extends \plugin_renderer_base {
         $output .= $this->output->box_end();
         return $output;
     }
-
-   public function show_open_close_dates($moduleinstance){
-        $tdata=[];
-        if($moduleinstance->viewstart>0){$tdata['opendate']=$moduleinstance->viewstart;}
-        if($moduleinstance->viewend>0){$tdata['closedate']=$moduleinstance->viewend;}
-        $ret = $this->output->render_from_template( constants::M_COMPONENT . '/openclosedates',$tdata);
-        return $ret;
-    } 
-
 }

@@ -188,12 +188,6 @@ class comprehensiontest
                     $testitem->itemttsoption=$item->{constants::TTSQUESTIONOPTION};
                     $testitem->itemttsautoplay=$item->{constants::TTSAUTOPLAY};
                 }
-                //YT Clip
-                if(!empty(trim($item->{constants::YTVIDEOID}))){
-                    $testitem->itemytvideoid=$item->{constants::YTVIDEOID};
-                    $testitem->itemytvideostart=$item->{constants::YTVIDEOSTART};
-                    $testitem->itemytvideoend=$item->{constants::YTVIDEOEND};
-                }
 
                 //Question TextArea
                 if(!empty(trim($item->{constants::QUESTIONTEXTAREA}))){
@@ -226,14 +220,13 @@ class comprehensiontest
             $imageset = isset($testitem->itemimage) && !empty($testitem->itemimage);
             $videoset =isset($testitem->itemvideo) && !empty($testitem->itemvideo);
             $iframeset =isset($testitem->itemiframe) && !empty($testitem->itemiframe);
-            $ytclipset =isset($testitem->itemytvideoid) && !empty($testitem->itemytvideoid);
 
             //layout
             $testitem->layout=$item->{constants::LAYOUT};
             if($testitem->layout==constants::LAYOUT_AUTO) {
                 //if its not a page or shortanswer, any big content item will make it horizontal layout
                 if ($testitem->type !== constants::TYPE_PAGE && $testitem->type !== constants::TYPE_SHORTANSWER) {
-                    if ($textset || $imageset || $videoset || $iframeset || $ytclipset) {
+                    if ($textset || $imageset || $videoset || $iframeset) {
                         $testitem->horizontal = true;
                     }
                 }
@@ -299,27 +292,18 @@ class comprehensiontest
 
                         if($testitem->type==constants::TYPE_MULTIAUDIO){
                             if($item->{constants::SHOWTEXTPROMPT}==constants::TEXTPROMPT_DOTS){
-                                $prompt = $this->dottify_text($sentence);
-                                $displayprompt = $prompt;
+                                $displaysentence = $this->dottify_text($sentence);
                             }else{
-                                $prompt = $sentence;
-                                $displayprompt = $sentence;
+                                $displaysentence = $sentence;
                             }
                         }else{
-                            //if we have a pipe prompt = array[0] and response = array[1]
+                            //if we have a pipe we are listening for array[0] and displaying array[1]
                             $sentencebits = explode('|', $sentence);
                             if (count($sentencebits) > 1) {
-                                $prompt = trim($sentencebits[0]);
-                                $sentence = trim($sentencebits[1]);
-                                if(count($sentencebits) >2){
-                                    $displayprompt = trim($sentencebits[2]);
-                                }else{
-                                    $displayprompt = $prompt;
-                                }
-                                
+                                $sentence = trim($sentencebits[0]);
+                                $displaysentence = trim($sentencebits[1]);
                             } else {
-                                $prompt = $sentence;
-                                $displayprompt = $sentence;
+                                $displaysentence = $sentence;
                             }
                         }
 
@@ -344,8 +328,7 @@ class comprehensiontest
                         $s->index = $index;
                         $s->indexplusone = $index + 1;
                         $s->sentence = $sentence;
-                        $s->prompt = $prompt;
-                        $s->displayprompt = $displayprompt;
+                        $s->displaysentence = $displaysentence;
                         $s->length = \core_text::strlen($s->sentence);
 
                         //add phonetics if we have them
@@ -407,9 +390,9 @@ class comprehensiontest
                             $s->length = \core_text::strlen($sentence);
 
                             if($item->{constants::LISTENORREAD}==constants::LISTENORREAD_LISTEN) {
-                                $s->prompt = $this->dottify_text($sentence);
+                                $s->displaysentence = $this->dottify_text($sentence);
                             }else {
-                                $s->prompt =$sentence;
+                                $s->displaysentence =$sentence;
                             }
 
                             $testitem->sentences[] = $s;

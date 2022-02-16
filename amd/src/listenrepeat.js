@@ -67,33 +67,23 @@ define(['jquery', 'core/log', 'core/ajax', 'mod_minilesson/definitions', 'mod_mi
     register_events: function() {
 
       var self = this;
-      //on next button click
+
       $("#" + self.itemdata.uniqueid + "_container .minilesson_nextbutton").on('click', function(e) {
         self.next_question();
       });
-      //on start button click
+
       $("#" + self.itemdata.uniqueid + "_container .landr_start_btn").on("click", function() {
         self.start();
       });
-      //on listen button click
+
       $("#" + self.itemdata.uniqueid + "_container .landr_listen_btn").on("click", function() {
         self.items[self.game.pointer].audio.load();
         self.items[self.game.pointer].audio.play();
       });
-      //on skip button click
-      $("#" + self.itemdata.uniqueid + "_container .landr_skip_btn").on("click", function() {
-        //disable the buttons
-        $("#" + self.itemdata.uniqueid + "_container .landr_ctrl-btn").prop("disabled", true);
-        //reveal the prompt
-        $("#" + self.itemdata.uniqueid + "_container .landr_speech.landr_teacher_left").text(self.items[self.game.pointer].prompt + "");
-        //reveal the answer
-        $("#" + self.itemdata.uniqueid + "_container .landr_targetWord").each(function() {
-          var realidx = $(this).data("realidx");
-          var landr_targetWord = self.items[self.game.pointer].landr_targetWords[realidx];
-          $(this).val(landr_targetWord);
-        });
 
-        //move on after 3s
+      $("#" + self.itemdata.uniqueid + "_container .landr_skip_btn").on("click", function() {
+        $("#" + self.itemdata.uniqueid + "_container .landr_ctrl-btn").prop("disabled", true);
+        $("#" + self.itemdata.uniqueid + "_container .landr_speech.landr_teacher_left").text(self.items[self.game.pointer].target + "");
         setTimeout(function() {
           if (self.game.pointer < self.items.length - 1) {
             self.items[self.game.pointer].answered = true;
@@ -129,8 +119,7 @@ define(['jquery', 'core/log', 'core/ajax', 'mod_minilesson/definitions', 'mod_mi
             return e !== "";
           }),
           target: target.sentence,
-          prompt: target.prompt,
-          displayprompt: target.displayprompt,
+          prompt: target.displaysentence,
           phonetic: target.phonetic,
           typed: "",
           answered: false,
@@ -194,7 +183,7 @@ define(['jquery', 'core/log', 'core/ajax', 'mod_minilesson/definitions', 'mod_mi
         }
 
       } else {
-        //mark up the words as correct or not
+
         comparison.forEach(function(obj) {
           if(!obj.matched){
             $("#" + self.itemdata.uniqueid + "_container .landr_targetWord[data-idx='" + obj.wordnumber + "']").addClass("landr_incorrect");
@@ -204,13 +193,13 @@ define(['jquery', 'core/log', 'core/ajax', 'mod_minilesson/definitions', 'mod_mi
             $("#" + self.itemdata.uniqueid + "_container .landr_feedback[data-idx='" + obj.wordnumber + "']").addClass("fa fa-check");
           }
         });
-        //shake the screen
+
         $("#" + self.itemdata.uniqueid + "_container .landr_reply_" + self.game.pointer).effect("shake", function() {
           $("#" + self.itemdata.uniqueid + "_container .landr_ctrl-btn").prop("disabled", false);
         });
 
       }
-      //show all the correct words
+
       $("#" + self.itemdata.uniqueid + "_container .landr_targetWord.landr_correct").each(function() {
         var realidx = $(this).data("realidx");
         var landr_targetWord = self.items[self.game.pointer].landr_targetWords[realidx];
@@ -296,17 +285,16 @@ define(['jquery', 'core/log', 'core/ajax', 'mod_minilesson/definitions', 'mod_mi
       var self = this;
 
       var target = self.items[self.game.pointer].target;
-      var displayprompt = self.items[self.game.pointer].displayprompt;
       var code = "<div class='landr_prompt landr_prompt_" + self.game.pointer + "' style='display:none;'>";
 
       code += "<i class='fa fa-graduation-cap landr_speech-icon-left'></i>";
       code += "<div style='margin-left:90px;' class='landr_speech landr_teacher_left'>";
       if(!showText){
-        var nopunc = displayprompt.replace(self.quizhelper.nopunc_regexp,"");
+        var nopunc = target.replace(self.quizhelper.nopunc_regexp,"");
         var dots = nopunc.replace(self.quizhelper.nonspaces_regexp, '•');
         code += dots;
       } else{
-        code += displayprompt;
+        code += target;
       }
       code += "</div>";
       code += "</div>";

@@ -50,22 +50,9 @@ define(['jquery', 'core/log', 'core/ajax', 'mod_minilesson/definitions', 'mod_mi
         self.items[self.game.pointer].audio.play();
       });
 
-      //on skip button click
       $("#" + self.itemdata.uniqueid + "_container .dictate_skip_btn").on("click", function() {
-        //disable buttons
         $("#" + self.itemdata.uniqueid + "_container .dictate_ctrl-btn").prop("disabled", true);
-        //reveal prompt
-        $("#" + self.itemdata.uniqueid + "_container .dictate_speech.dictate_teacher_left").text(self.items[self.game.pointer].prompt + "");
-        //reveal answers
-        //reveal the answer
-        $("#" + self.itemdata.uniqueid + "_container .dictate_targetWord").each(function() {
-          var realidx = $(this).data("realidx");
-          var dictate_targetWord = self.items[self.game.pointer].dictate_targetWords[realidx];
-          $(this).val(dictate_targetWord);
-        });
-
-
-        //move on after 3s
+        $("#" + self.itemdata.uniqueid + "_container .dictate_speech.dictate_teacher_left").text(self.items[self.game.pointer].target + "");
         setTimeout(function() {
           if (self.game.pointer < self.items.length - 1) {
             self.items[self.game.pointer].answered = true;
@@ -82,45 +69,10 @@ define(['jquery', 'core/log', 'core/ajax', 'mod_minilesson/definitions', 'mod_mi
       $("#" + self.itemdata.uniqueid + "_container .dictate_check_btn").on("click", function() {
         self.check_answer();
       });
-
-      //listen for enter key
-      $("#" + self.itemdata.uniqueid + "_container").on("keydown",".dictate_targetWord", function(e) {
-        if (e.which == 13) {
+      
+      $("body").on("keydown",".dictate_targetWord", function(e) {
+        if(e.which==13){
           self.check_answer();
-        }
-      });
-
-      //auto nav between inputs
-      $("#" + self.itemdata.uniqueid + "_container").on("keyup",".dictate_targetWord", function(e) {
-
-        //move focus between textboxes
-        //log.debug(e);
-        var target = e.srcElement || e.target;
-        var maxLength = parseInt(target.attributes["maxlength"].value, 10);
-        var myLength = target.value.length;
-        var key = e.which;
-        if (myLength >= maxLength) {
-          var next = $(this);
-          while (next = next.parent().next().children('input.dictate_targetWord')) {
-            if (next.length === 1){
-              next.focus();
-              break;
-            }else{
-              break;
-
-            }
-          }
-          // Move to previous field if empty (user pressed backspace or delete)
-        } else if (( key == 8 || key == 46 ) && myLength === 0) {
-          var previous = $(this);
-          while (previous = previous.parent().prev().children('input.dictate_targetWord')) {
-            if (previous.length === 1) {
-              previous.focus();
-              break;
-            }else{
-              break;
-            }
-          }
         }
       });
       
@@ -161,8 +113,7 @@ define(['jquery', 'core/log', 'core/ajax', 'mod_minilesson/definitions', 'mod_mi
             return e !== "";
           }),
           target: target.sentence,
-          prompt: target.prompt,
-          displayprompt: target.displayprompt,
+          prompt: target.displaysentence,
           typed: "",
           answered: false,
           correct: false,
@@ -328,11 +279,9 @@ define(['jquery', 'core/log', 'core/ajax', 'mod_minilesson/definitions', 'mod_mi
     nextPrompt: function() {
 
       var self = this;
-      var target = self.items[self.game.pointer].target;
-      var prompt = self.items[self.game.pointer].prompt;
-      var displayprompt = self.items[self.game.pointer].displayprompt;
 
-      var nopunc = prompt.replace(self.quizhelper.nopunc_regexp,"");
+      var target = self.items[self.game.pointer].target;
+      var nopunc = target.replace(self.quizhelper.nopunc_regexp,"");
       var dots = nopunc.replace(self.quizhelper.nonspaces_regexp, '•');
       var code = "<div class='dictate_prompt dictate_prompt_" + self.game.pointer + "' style='display:none;'>";
 

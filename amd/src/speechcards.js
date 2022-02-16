@@ -44,8 +44,9 @@ define(['jquery', 'jqueryui', 'core/log', 'core/ajax', 'mod_minilesson/definitio
           for (var i = 0; i < itemdata.sentences.length; i++) {
             app.terms[i] = itemdata.sentences[i].sentence;
             app.phonetics[i] = itemdata.sentences[i].phonetic;
-            app.displayterms[i] = itemdata.sentences[i].prompt;
+            app.displayterms[i] = itemdata.sentences[i].displaysentence;
           }
+          log.debug("app terms", app.terms);
           app.language = itemdata.language;
 
           this.init_controls();
